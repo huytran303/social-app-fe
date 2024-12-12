@@ -1,11 +1,11 @@
 // app/layout.tsx
-
 'use client';
 
 import './globals.css';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from "@/components/theme-provider";
 import AuthWrapper from '@/app/AuthWrapper';
+import { Toaster } from "@/components/ui/toaster";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -25,15 +25,16 @@ export default function RootLayout({
           </AuthWrapper>
           <ToastContainer
             position="top-right"
-            autoClose={5000}
+            autoClose={2000}
             hideProgressBar={false}
-            newestOnTop={false}
+            newestOnTop
             closeOnClick
             rtl={false}
             pauseOnFocusLoss
-            draggable
-            pauseOnHover
+            draggable={false}
+            theme="colored"
           />
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

@@ -9,41 +9,53 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { extractUserIdFromToken } from '@/services/jwtServices'
 import { getUserProfile } from '@/services/userServices'
+import { toast } from 'react-toastify'
 import Loading from '@/components/Loading'
-
+import axios from '@/setup/axios'
 export default function ProfilePage() {
   const [userData, setUserData] = useState(null)
   const [posts, setPosts] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const router = useRouter()
+  const handleLogout = async () => {
+    try {
+      await axios.post('/users/logout');
+      sessionStorage.clear();
 
-  const handleLogout = () => {
-    sessionStorage.clear()
-    router.push('/login')
-  }
+      toast.success('Logout successful');
+
+      router.push('/login');
+    } catch (error) {
+      console.log('Logout failed:', error);
+      // Still clear session and redirect on error
+      sessionStorage.clear();
+      router.push('/login');
+    }
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         if (typeof window !== 'undefined') {
           const userData = sessionStorage.getItem('user')
-          if (!userData) throw new Error('No user data found')
+          if (!userData) console.log('No user data found')
 
           const parsedData = JSON.parse(userData)
-          if (!parsedData.token) throw new Error('No token found')
+          console.log('Parsed data:', parsedData.data.token)
+          if (!parsedData.data.token) console.log('No token found')
 
-          const userId = await extractUserIdFromToken(parsedData.token, process.env.NEXT_PUBLIC_JWT_SIGNED_KEY)
+          const userId = await extractUserIdFromToken(parsedData.data.token, process.env.NEXT_PUBLIC_JWT_SIGNED_KEY)
           console.log('User ID:', userId)
 
           const response = await getUserProfile(userId)
-          if (!response?.result) throw new Error('Failed to fetch user data')
+          if (!response?.result) console.log('Failed to fetch user data')
           console.log('User data:', response.result)
           setUserData(response.result)
           setPosts(response.result.posts || [])
         }
       } catch (error) {
-        console.error('Error:', error)
+        console.log('Error:', error)
       } finally {
         setIsLoading(false)
       }

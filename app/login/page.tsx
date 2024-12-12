@@ -32,22 +32,47 @@ export default function LoginPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   function checkCookie() {
-    const user = sessionStorage.getItem('user')
+    const user = sessionStorage.getItem('user');
     if (user) {
-      const parsedUser = JSON.parse(user)
-      if (parsedUser.isAuthenticated) {
-        setIsAuthenticated(true)
+      const parsedUser = JSON.parse(user);
+      const now = Date.now();
+
+      // Kiểm tra nếu đã hết hạn
+      if (now > parsedUser.expiry) {
+        sessionStorage.removeItem('user');
+        setIsAuthenticated(false);
+      } else {
+        setIsAuthenticated(parsedUser.isAuthenticated);
       }
     }
   }
 
   useEffect(() => {
-    checkCookie()
-  }, [])
+    // Kiểm tra session khi component được mount
+    checkCookie();
 
-  console.log('isAuthenticated login page:', isAuthenticated)
+    // Thiết lập interval để kiểm tra session mỗi giây
+    const intervalId = setInterval(() => {
+      const user = sessionStorage.getItem('user');
+      if (user) {
+        const parsedUser = JSON.parse(user);
+        const now = Date.now();
+
+        if (now > parsedUser.expiry) {
+          sessionStorage.removeItem('user');
+          setIsAuthenticated(false);
+          console.log('Session expired. User data removed.');
+        }
+      }
+    }, 1000); // Kiểm tra mỗi giây
+
+    // Xóa interval khi component bị unmount
+    return () => clearInterval(intervalId);
+  }, []);
+
+  console.log('isAuthenticated login page:', isAuthenticated);
   if (isAuthenticated === true) {
-    window.location.href = '/'
+    window.location.href = '/';
   }
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -56,34 +81,38 @@ export default function LoginPage() {
       username: '',
       password: '',
     },
-  })
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const response = await loginUser(values.username, values.password)
-      const serverData = response.data
-      const token = serverData.result.token
-      if (response) {
+      const response = await loginUser(values.username, values.password);
+
+      if (response && response.status === 200) {
+        const serverData = response.data;
+        const token = serverData.result.token;
+
+        // Lưu dữ liệu vào sessionStorage với thời gian hết hạn (15 giây)
         const data = {
           message: 'Login successful',
           isAuthenticated: true,
           token: token,
-        }
-        sessionStorage.setItem('user', JSON.stringify(data))
-        toast.success('Login successful. Redirecting to the home page...')
-        //alert('Login successful. Redirecting to the home page...')
-        window.location.href = '/'
-        // Handle successful login (e.g., redirect the user)
-        // Example: redirect to the dashboard
+        };
+        const ttl = 60 * 60 * 1000; // 1h
+        const now = Date.now();
+
+        sessionStorage.setItem('user', JSON.stringify({ data, expiry: now + ttl }));
+
+        toast.success('Login successful. Redirecting to the home page...');
+        window.location.href = '/';
       } else {
-        throw new Error('Invalid login credentials')
+        console.log('Invalid login credentials');
       }
     } catch (error) {
-      console.log('Login failed:', error)
-      toast.error('Login failed. Please check your username and password and try again.')
+      console.log('Login failed:', error);
+      toast.error('Login failed. Please check your username and password and try again.');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 

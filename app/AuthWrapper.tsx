@@ -37,7 +37,7 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
                     router.replace('/login');
                 }
             } catch (error) {
-                console.error('Auth check error:', error);
+                console.log('Auth check error:', error);
                 router.replace('/login');
             }
         };

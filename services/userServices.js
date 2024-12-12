@@ -25,7 +25,7 @@ const registerNewUser = async (username, password, email, firstName, lastName, d
         console.log('Registration successful:', username);
         return response.data;
     } catch (error) {
-        console.error('Registration failed:', error.response?.data || error.message);
+        console.log('Registration failed:', error.response?.data || error.message);
         throw error;
     }
 };
@@ -53,7 +53,7 @@ const getUserProfile = async (userId) => {
         const response = await axios.get(`/users/${userId}`);
         return response.data;
     } catch (error) {
-        console.error(`Failed to fetch profile for user ${userId}:`, error.response?.data || error.message);
+        console.log(`Failed to fetch profile for user ${userId}:`, error.response?.data || error.message);
         throw error;
     }
 };
@@ -64,12 +64,39 @@ const getUserProfile = async (userId) => {
  * @param {Object} updates - Object containing profile updates
  * @returns {Promise} Response containing updated user profile
  */
+
 const updateUserProfile = async (userId, updates) => {
     try {
-        const response = await axios.put(`/users/${userId}`, updates);
+        if (!userId) {
+            throw new Error('User ID is required');
+        }
+
+        if (!updates?.currentPassword) {
+            throw new Error('Current password is required');
+        }
+
+        // Include bio in payload
+        const payload = {
+            currentPassword: updates.currentPassword,
+            firstName: updates.firstName,
+            lastName: updates.lastName,
+            bio: updates.bio, // Add this line
+            dob: updates.dob,
+            password: updates.password,
+            avatarUrl: updates.avatarUrl,
+        };
+
+        // Remove undefined fields
+        Object.keys(payload).forEach(key => {
+            if (payload[key] === undefined) {
+                delete payload[key];
+            }
+        });
+
+        const response = await axios.put(`/users/${userId}`, payload);
         return response.data;
     } catch (error) {
-        console.error(`Failed to update profile for user ${userId}:`, error.response?.data || error.message);
+        // Error handling
         throw error;
     }
 };

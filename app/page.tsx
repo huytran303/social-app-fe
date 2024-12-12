@@ -34,7 +34,21 @@ const posts = [
 ]
 
 export default function HomePage() {
+  function getSessionStorageWithExpiry(key) {
+    const itemStr = sessionStorage.getItem(key);
 
+    if (!itemStr) return null;
+
+    const item = JSON.parse(itemStr);
+    const now = Date.now();
+
+    if (now > item.expiry) {
+      sessionStorage.removeItem(key);
+      return null;
+    }
+
+    return item.data;
+  }
   return (
     <div className="container mx-auto max-w-2xl px-4 py-8 space-y-8">
       <div className="sticky top-0 bg-background pt-4 pb-2 z-10">

@@ -5,7 +5,7 @@ const extractUserIdFromToken = async (token, secretKey) => {
     console.log('checking secretKey:', secretKey)
 
     if (!secretKey) {
-        console.error('Secret key is undefined')
+        console.log('Secret key is undefined')
         return null
     }
 
