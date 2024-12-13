@@ -9,18 +9,18 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 
 // This would typically come from a database
 const posts = [
-  { 
-    id: 1, 
-    username: 'User1', 
-    content: 'This is the first post content.', 
+  {
+    id: 1,
+    username: 'User1',
+    content: 'This is the first post content.',
     likes: [
       { id: 1, username: 'LikerA' },
       { id: 2, username: 'LikerB' },
       { id: 3, username: 'LikerC' },
       { id: 4, username: 'LikerD' },
       { id: 5, username: 'LikerE' },
-    ], 
-    comments: 5 
+    ],
+    comments: 5
   },
   { id: 2, username: 'User2', content: 'This is the second post content.', likes: 15, comments: 3 },
   { id: 3, username: 'User3', content: 'This is the third post content.', likes: 7, comments: 1 },
@@ -39,7 +39,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back to feed
       </Link>
-      
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div className="flex items-center space-x-3">
@@ -111,7 +111,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
             <Button>Post Comment</Button>
           </CardFooter>
         </Card>
-        
+
         {[...Array(post.comments)].map((_, index) => (
           <Card key={index} className="mb-4">
             <CardHeader className="flex flex-row items-center space-y-0 pb-2">
